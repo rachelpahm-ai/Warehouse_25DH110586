@@ -1,0 +1,149 @@
+﻿
+@model IEnumerable<Warehouse_25DH110586.Models.Products>
+
+@{
+    ViewBag.Title = "Lọc và sắp xếp sản phẩm";
+    var categories = ViewBag.Categories as List<string>;
+}
+
+<h2>Lọc và sắp xếp sản phẩm</h2>
+<p>Tìm kiếm sản phẩm theo danh mục và khoảng giá.</p>
+
+<div class="filter-card">
+    @using (Html.BeginForm("Filter", "Products",
+        FormMethod.Get))
+    {
+        <div class="filter-grid">
+
+            <div class="form-group">
+                <label>Từ giá (VNĐ)</label>
+                <input type="number"
+                       name="minPrice"
+                       min="0"
+                       step="1"
+                       class="form-control"
+                       value="@ViewBag.MinPrice"
+                       placeholder="Ví dụ: 100000" />
+            </div>
+
+            <div class="form-group">
+                <label>Đến giá (VNĐ)</label>
+                <input type="number"
+                       name="maxPrice"
+                       min="0"
+                       step="1"
+                       class="form-control"
+                       value="@ViewBag.MaxPrice"
+                       placeholder="Ví dụ: 500000" />
+            </div>
+
+            <div class="form-group">
+                <label>Danh mục</label>
+                <select name="category" class="form-control">
+                    <option value="">Tất cả danh mục</option>
+
+                    @if (categories != null)
+                    {
+                        foreach (var c in categories)
+                        {
+                            <option value="@c"
+                                    selected="@(ViewBag.Category == c ? "selected" : null)">
+                                @c
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Sắp xếp theo giá</label>
+                <select name="sortOrder" class="form-control">
+                    <option value="asc"
+                            selected="@(ViewBag.SortOrder != "desc" ? "selected" : null)">
+                        Giá tăng dần
+                    </option>
+                    <option value="desc"
+                            selected="@(ViewBag.SortOrder == "desc" ? "selected" : null)">
+                        Giá giảm dần
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">
+                Lọc sản phẩm
+            </button>
+
+            @Html.ActionLink("Đặt lại", "Filter", "Products",
+                null, new { @class = "btn btn-default" })
+        </div>
+    }
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+else
+{
+    <div class="filter-results">
+        <h3>Kết quả: @Model.Count() sản phẩm</h3>
+
+        <table class="table product-table">
+            <thead>
+                <tr>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Đơn giá</th>
+                    <th>Tồn kho</th>
+                    <th>Mức giá</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    string level;
+                    string css;
+
+                    if (item.Price < 100000)
+                    {
+                        level = "Giá thấp";
+                        css = "price-low";
+                    }
+                    else if (item.Price < 500000)
+                    {
+                        level = "Giá trung bình";
+                        css = "price-medium";
+                    }
+                    else
+                    {
+                        level = "Giá cao";
+                        css = "price-high";
+                    }
+
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>@item.Category</td>
+                        <td>@item.Price.ToString("N0") đ</td>
+                        <td>@item.Quantity</td>
+                        <td>
+                            <span class="price-badge @css">
+                                @level
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (!Model.Any())
+        {
+            <p class="text-muted">
+                Không tìm thấy sản phẩm phù hợp.
+            </p>
+        }
+    </div>
+}

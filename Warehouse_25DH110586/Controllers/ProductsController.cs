@@ -142,6 +142,101 @@ namespace Warehouse_25DH110586.Controllers
             return RedirectToAction("Index");
         }
 
+
+        // GET: Products/AdjustPrice
+        [HttpGet]
+        public ActionResult AdjustPrice()
+        {
+            ViewBag.Products = db.Products
+                .OrderBy(p => p.ProductName)
+                .ToList();
+
+            return View();
+        }
+
+        // POST: Products/AdjustPrice
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AdjustPrice(
+            int productId,
+            string actionType,
+            decimal? percent)
+        {
+            var product = db.Products.Find(productId);
+
+            if (product == null)
+                return HttpNotFound();
+
+            string error = null;
+
+            // Kiểm tra tỷ lệ phần trăm
+            if (!percent.HasValue)
+            {
+                error = "Vui lòng nhập tỷ lệ phần trăm hợp lệ.";
+            }
+            else if (actionType == "increase")
+            {
+                if (percent.Value <= 0 || percent.Value > 100)
+                    error = "Tỷ lệ tăng phải lớn hơn 0 và không vượt quá 100%.";
+            }
+            else if (actionType == "decrease")
+            {
+                if (percent.Value <= 0 || percent.Value >= 100)
+                    error = "Tỷ lệ giảm phải lớn hơn 0 và nhỏ hơn 100%.";
+            }
+            else
+            {
+                error = "Thao tác không hợp lệ.";
+            }
+
+            decimal newPrice = product.Price;
+
+            if (error == null)
+            {
+                if (actionType == "increase")
+                {
+                    newPrice = product.Price *
+                               (1 + percent.Value / 100m);
+                }
+                else
+                {
+                    newPrice = product.Price *
+                               (1 - percent.Value / 100m);
+                }
+
+                newPrice = Math.Round(
+                    newPrice, 2, MidpointRounding.AwayFromZero);
+
+                // Giá sau giảm không được dưới 1.000
+                if (actionType == "decrease" && newPrice < 1000m)
+                {
+                    error = "Giá sau giảm không được nhỏ hơn 1.000 đồng.";
+                }
+            }
+
+            if (error != null)
+            {
+                ViewBag.Error = error;
+            }
+            else
+            {
+                product.Price = newPrice;
+                db.SaveChanges();
+
+                TempData["Success"] =
+                    "Điều chỉnh giá thành công! Giá mới: " +
+                    newPrice.ToString("N0") + " đ";
+
+                return RedirectToAction("AdjustPrice");
+            }
+
+            ViewBag.Products = db.Products
+                .OrderBy(p => p.ProductName)
+                .ToList();
+
+            return View();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
