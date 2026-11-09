@@ -1,0 +1,92 @@
+﻿
+@{
+    ViewBag.Title = "Giảm giá hai sản phẩm";
+    var products = ViewBag.Products;
+}
+
+<h2>Giảm giá hai sản phẩm</h2>
+<p>Áp dụng giảm giá đồng thời cho hai sản phẩm trong một giao dịch.</p>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+
+<div class="discount-card">
+
+    @using (Html.BeginForm("DiscountTwo", "Products", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <h3>Sản phẩm thứ nhất</h3>
+
+        <div class="form-group">
+            <label>Chọn sản phẩm A</label>
+            <select name="productId1" class="form-control" required>
+                <option value="">-- Chọn sản phẩm A --</option>
+
+                @foreach (var p in products)
+                {
+                    <option value="@p.ProductID">
+                        @p.ProductName - @p.Price.ToString("N0") đ
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Tỷ lệ giảm A (%)</label>
+            <input type="number"
+                   name="percent1"
+                   class="form-control"
+                   step="0.01"
+                   placeholder="Ví dụ: 10" />
+        </div>
+
+        <hr />
+
+        <h3>Sản phẩm thứ hai</h3>
+
+        <div class="form-group">
+            <label>Chọn sản phẩm B</label>
+            <select name="productId2" class="form-control" required>
+                <option value="">-- Chọn sản phẩm B --</option>
+
+                @foreach (var p in products)
+                {
+                    <option value="@p.ProductID">
+                        @p.ProductName - @p.Price.ToString("N0") đ
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Tỷ lệ giảm B (%)</label>
+            <input type="number"
+                   name="percent2"
+                   class="form-control"
+                   step="0.01"
+                   placeholder="Ví dụ: 20" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Xác nhận giảm giá
+        </button>
+
+        @Html.ActionLink(
+            "Quay lại danh sách",
+            "Index", "Products", null,
+            new { @class = "btn btn-default" })
+    }
+
+</div>

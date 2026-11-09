@@ -35,28 +35,79 @@ namespace Warehouse_25DH110586.Controllers
             return View(products);
         }
 
+
         // GET: Products/Create
+        [HttpGet]
         public ActionResult Create()
         {
             return View();
         }
 
         // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ProductID,ProductName,Category,Price,Quantity")] Products products)
+        public ActionResult Create(
+            string ProductName,
+            string Category,
+            decimal? Price,
+            int? Quantity)
         {
-            if (ModelState.IsValid)
+            // Kiểm tra tên sản phẩm
+            if (string.IsNullOrWhiteSpace(ProductName))
             {
-                db.Products.Add(products);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                ModelState.AddModelError(
+                    "ProductName",
+                    "Tên sản phẩm không được để trống.");
             }
 
-            return View(products);
+            // Kiểm tra danh mục
+            if (string.IsNullOrWhiteSpace(Category))
+            {
+                ModelState.AddModelError(
+                    "Category",
+                    "Danh mục không được để trống.");
+            }
+
+            // Kiểm tra đơn giá
+            if (!Price.HasValue || Price.Value <= 0)
+            {
+                ModelState.AddModelError(
+                    "Price",
+                    "Đơn giá phải lớn hơn 0.");
+            }
+
+            // Kiểm tra số lượng
+            if (!Quantity.HasValue || Quantity.Value < 0)
+            {
+                ModelState.AddModelError(
+                    "Quantity",
+                    "Số lượng phải là số nguyên không âm.");
+            }
+
+            // Nếu có lỗi thì không lưu
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            // Tạo sản phẩm mới
+            var product = new Products
+            {
+                ProductName = ProductName.Trim(),
+                Category = Category.Trim(),
+                Price = Price.Value,
+                Quantity = Quantity.Value
+            };
+
+            // Lưu vào SQL Server bằng Entity Framework
+            db.Products.Add(product);
+            db.SaveChanges();
+
+            TempData["Success"] = "Thêm sản phẩm thành công!";
+
+            return RedirectToAction("Index");
         }
+
 
         // GET: Products/Edit/5
         public ActionResult Edit(int? id)
