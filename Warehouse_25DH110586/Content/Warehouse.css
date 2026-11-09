@@ -121,3 +121,90 @@ body {
         padding: 20px;
     }
 }
+
+
+/* ===== QUESTION 2 ===== */
+
+.product-table {
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0,0,0,.05);
+}
+
+    .product-table thead {
+        background: #244b78;
+        color: white;
+    }
+
+    .product-table th,
+    .product-table td {
+        padding: 14px !important;
+        vertical-align: middle !important;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .product-table tbody tr:hover {
+        background: #f2f7fd;
+    }
+
+.price-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.price-low {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.price-medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.price-high {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* EDIT FORM */
+
+.edit-card {
+    max-width: 650px;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.06);
+}
+
+    .edit-card h2 {
+        color: #244b78;
+        margin-top: 0;
+    }
+
+    .edit-card .form-group {
+        margin: 20px 0;
+    }
+
+    .edit-card label {
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .edit-card .form-control {
+        height: 43px;
+        border-radius: 6px;
+    }
+
+    .edit-card .btn-primary,
+    .product-table .btn-primary {
+        background: #244b78;
+        border-color: #244b78;
+        border-radius: 6px;
+    }
