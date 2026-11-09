@@ -1,0 +1,76 @@
+﻿
+@{
+    ViewBag.Title = "Điều chỉnh giá bán";
+    var products = ViewBag.Products;
+}
+
+<h2>Điều chỉnh giá bán</h2>
+<p>Tăng hoặc giảm giá sản phẩm theo tỷ lệ phần trăm.</p>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+
+<div class="adjust-card">
+
+    <h3>Thông tin điều chỉnh</h3>
+
+    @using (Html.BeginForm("AdjustPrice", "Products", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label>Chọn sản phẩm</label>
+
+            <select name="productId" class="form-control" required>
+                <option value="">-- Chọn sản phẩm --</option>
+
+                @foreach (var p in products)
+                {
+                    <option value="@p.ProductID">
+                        @p.ProductName - @p.Price.ToString("N0") đ
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Loại điều chỉnh</label>
+
+            <select name="actionType" class="form-control">
+                <option value="increase">Tăng giá</option>
+                <option value="decrease">Giảm giá</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Tỷ lệ (%)</label>
+
+            <input type="number"
+                   name="percent"
+                   class="form-control"
+                   placeholder="Nhập phần trăm"
+                   step="0.01" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Xác nhận điều chỉnh
+        </button>
+
+        @Html.ActionLink(
+            "Quay lại danh sách",
+            "Index", "Products", null,
+            new { @class = "btn btn-default" })
+    }
+
+</div>

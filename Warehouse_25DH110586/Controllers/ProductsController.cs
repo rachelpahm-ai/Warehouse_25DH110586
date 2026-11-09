@@ -237,6 +237,110 @@ namespace Warehouse_25DH110586.Controllers
             return View();
         }
 
+
+
+        // GET: Products/DiscountTwo
+        [HttpGet]
+        public ActionResult DiscountTwo()
+        {
+            ViewBag.Products = db.Products
+                .OrderBy(p => p.ProductName)
+                .ToList();
+
+            return View();
+        }
+
+        // POST: Products/DiscountTwo
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DiscountTwo(
+            int productId1,
+            int productId2,
+            decimal? percent1,
+            decimal? percent2)
+        {
+            string error = null;
+
+            // Hai sản phẩm phải khác nhau
+            if (productId1 == productId2)
+                error = "Vui lòng chọn hai sản phẩm khác nhau.";
+
+            // Kiểm tra tỷ lệ giảm
+            if (!percent1.HasValue || !percent2.HasValue ||
+                percent1.Value <= 0 || percent1.Value >= 100 ||
+                percent2.Value <= 0 || percent2.Value >= 100)
+            {
+                error = "Tỷ lệ giảm phải lớn hơn 0 và nhỏ hơn 100%.";
+            }
+
+            // Không cập nhật nếu dữ liệu đầu vào sai
+            if (error != null)
+            {
+                ViewBag.Error = error;
+                ViewBag.Products = db.Products
+                    .OrderBy(p => p.ProductName).ToList();
+                return View();
+            }
+
+            // Transaction: thành công cả hai hoặc không cập nhật
+            using (var transaction = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var product1 = db.Products.Find(productId1);
+                    var product2 = db.Products.Find(productId2);
+
+                    if (product1 == null || product2 == null)
+                    {
+                        transaction.Rollback();
+                        error = "Không tìm thấy sản phẩm.";
+                    }
+                    else
+                    {
+                        decimal newPrice1 = Math.Round(
+                            product1.Price * (1 - percent1.Value / 100m),
+                            2, MidpointRounding.AwayFromZero);
+
+                        decimal newPrice2 = Math.Round(
+                            product2.Price * (1 - percent2.Value / 100m),
+                            2, MidpointRounding.AwayFromZero);
+
+                        // Kiểm tra CẢ HAI giá trước khi lưu
+                        if (newPrice1 < 1000m || newPrice2 < 1000m)
+                        {
+                            transaction.Rollback();
+                            error = "Giá sau giảm của mỗi sản phẩm phải từ 1.000 đồng trở lên. Không sản phẩm nào được cập nhật.";
+                        }
+                        else
+                        {
+                            product1.Price = newPrice1;
+                            product2.Price = newPrice2;
+
+                            db.SaveChanges();
+                            transaction.Commit();
+
+                            TempData["Success"] =
+                                "Giảm giá thành công cho cả hai sản phẩm!";
+
+                            return RedirectToAction("DiscountTwo");
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    error = "Giao dịch thất bại. Không có giá nào được lưu.";
+                }
+            }
+
+            ViewBag.Error = error;
+            ViewBag.Products = db.Products
+                .OrderBy(p => p.ProductName)
+                .ToList();
+
+            return View();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
